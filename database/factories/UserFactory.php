@@ -30,7 +30,6 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'bio' => fake()->sentence(25),
             'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($name),
-            'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];

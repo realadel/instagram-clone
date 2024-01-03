@@ -21,6 +21,7 @@ class PostFactory extends Factory
         return [
             'user_id' => User::factory(),
             'image' => 'posts/' . fake()->randomElement($images),
+
             'description' => fake()->sentence(40),
             'slug' => fake()->regexify('[A-Za-z0-9]{10}')
         ];
