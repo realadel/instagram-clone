@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -20,7 +22,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return view('posts.create');
     }
 
     /**
@@ -28,7 +30,16 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = request()->validate([
+            'image' => ['required', 'image', 'mimes:png,jpg,gif,jpeg'],
+            'description' => ['required', 'string']
+        ]);
+
+        $image = $request['image']->store('posts', 'public');
+        $data['image'] = $image;
+        $data['slug'] = Str::random(10);
+        auth()->user()->posts()->create($data);
+        return redirect()->route('post.show', $data['slug']);
     }
 
     /**
@@ -36,7 +47,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return view('posts.show', compact('post'));
     }
 
     /**
@@ -44,7 +55,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        return view('posts.edit', compact('post'));
     }
 
     /**
@@ -52,7 +63,18 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        $data = $request->validate([
+           'image' => ['nullable', 'image', 'mimes:png,jpg,gif,jpeg'],
+            'description' => ['required', 'string']
+        ]);
+
+        if ($request->has('image')){
+            $imageSrc = $request['image']->store('posts', 'public');
+            $data['image'] = $imageSrc;
+            Storage::delete('public/' . $post->image); // Delete old image
+        }
+        $post->update($data);
+        return redirect()->route('post.show', $post->slug);
     }
 
     /**
@@ -60,6 +82,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        Storage::delete('public/' . $post->image);
+        $post->delete();
+        return redirect()->route('dashboard');
     }
 }
