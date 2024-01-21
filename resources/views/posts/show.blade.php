@@ -54,7 +54,7 @@
                     @csrf
                     <div class="flex flex-row">
                         <textarea name="body" placeholder="Add a comment" class="h-5 grow resize-none overflow-hidden border-none bg-none p-0 placeholder-gray-400 outline-0 focus:ring-0"></textarea>
-                        <button type="submit" class="ml-5 border-none bg-white text-blue-500">Post</button>
+                        <button type="submit" class="ml-5 border-none bg-white text-blue-500">{{ __('POST') }}</button>
                     </div>
                 </form>
             </div>

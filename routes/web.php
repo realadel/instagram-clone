@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\likeController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
+use Illuminate\Support\Facades\Route;
+
+require __DIR__.'/auth.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -16,13 +20,29 @@ use App\Http\Controllers\PostController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/explore', [PostController::class, 'explore'])->name('explore');
+
+// User Profile Routes
+Route::get('/{user:username}', [UserController::class, 'index'])->middleware('auth')->name('user.profile');
+Route::get('/{user:username}/edit', [UserController::class, 'edit'])->middleware('auth')->name('edit.profile');
+Route::patch('/{user:username}/update', [UserController::class, 'update'])->middleware('auth')->name('update.profile');
+
+// Post Controller Routes
+Route::controller(PostController::class)->middleware('auth')->group(function (){
+    Route::get('/', 'index')->name('home');
+    Route::get('/p/create', 'create')->name('post.create');
+    Route::post('/p/create', 'store')->name('post.store');
+    Route::get('/p/{post:slug}', 'show')->name('post.show');
+    Route::get('/p/{post:slug}/edit', 'edit')->name('post.edit');
+    Route::patch('/p/{post:slug}/edit', 'update')->name('post.update');
+    Route::delete('/p/{post:slug}/delete', 'destroy')->name('post.destroy');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Add Comment Route
+Route::post('/p/{post:slug}/comment', [CommentController::class, 'store'])->name('comment.store')->middleware('auth');
+
+// Like Posts Controller
+Route::get('/p/{post:slug}/like', likeController::class)->middleware('auth')->name('like.post');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -30,21 +50,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Create Post Routes
-Route::get('/p/create', [PostController::class, 'create'])->name('post.create')->middleware('auth');
-Route::post('/p/create', [PostController::class, 'store'])->name('post.store')->middleware('auth');
 
-// Show Post Route
-Route::get('/p/{post:slug}', [PostController::class, 'show'])->name('post.show')->middleware('auth');
 
-// Edit Post Routes
-Route::get('/p/{post:slug}/edit', [PostController::class, 'edit'])->name('post.edit')->middleware('auth');
-Route::patch('/p/{post:slug}/edit', [PostController::class, 'update'])->name('post.update')->middleware('auth');
-
-// Delete Post Route
-Route::delete('/p/{post:slug}/delete', [PostController::class, 'destroy'])->name('post.destroy')->middleware('auth');
-
-// Comments Routes
-Route::post('/p/{post:slug}/comment', [CommentController::class, 'store'])->name('comment.store')->middleware('auth');
-
-require __DIR__.'/auth.php';
