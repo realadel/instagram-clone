@@ -50,9 +50,45 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'follows', 'follower_id', 'following_id')
+            ->withTimestamps()
+            ->withPivot('accepted');
+    }
+
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'follows', 'following_id', 'follower_id')
+            ->withTimestamps()
+            ->withPivot('accepted');
+    }
+
+    public function follow(self $user): void
+    {
+        if (!$user->isPrivate){
+            $this->following()
+                ->attach($user, ['accepted' => true]);
+        }else {
+            $this->following()
+                ->attach($user);
+        }
+    }
+
+    public function unfollow(self $user): void
+    {
+        $this->following()
+            ->detach($user);
+    }
+
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function likes(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class, 'likes');
     }
 
     public function comments(): HasMany
@@ -62,14 +98,10 @@ class User extends Authenticatable
 
     public function suggested_users(): Collection
     {
-        return User::whereNot('id', auth()->id())
+        return self::whereNot('id', auth()->id())
             ->inRandomOrder()
             ->take(5)
             ->get();
     }
 
-    public function likes(): BelongsToMany
-    {
-        return $this->belongsToMany(Post::class, 'likes');
-    }
 }
