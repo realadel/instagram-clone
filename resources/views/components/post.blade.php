@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card shadow-lg shadow-gray-300">
 
     <div class="card-header">
         <img src="{{ $post->owner->avatar }}" alt="Owner avatar" class="w-9 h-9 mr-3 rounded-full">

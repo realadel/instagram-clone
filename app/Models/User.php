@@ -68,9 +68,11 @@ class User extends Authenticatable
     {
         if (!$user->isPrivate){
             $this->following()
+                ->withTimestamps()
                 ->attach($user, ['accepted' => true]);
         }else {
             $this->following()
+                ->withTimestamps()
                 ->attach($user);
         }
     }
@@ -98,10 +100,27 @@ class User extends Authenticatable
 
     public function suggested_users(): Collection
     {
-        return self::whereNot('id', auth()->id())
-            ->inRandomOrder()
-            ->take(5)
-            ->get();
+        $userFollowing = auth()->user()->following()->wherePivot('accepted', '=', true)->get();
+        return self::all()
+            ->diff($userFollowing)
+            ->except(auth()->user()->id)
+            ->shuffle()
+            ->take(5);
+    }
+
+    public function isFollowingRequestPending(User $user): bool
+    {
+        return $this->following()->where('following_id', $user->id)->where('accepted', '=', false)->exists();
+    }
+
+    public function isThisUserFollowingMe(User $user):bool
+    {
+        return $this->followers()->where('follower_id', '=', $user->id)->where('accepted', '=', true)->exists();
+    }
+
+    public function isThisUserInMyFollowing(User $user): bool
+    {
+        return $this->following()->where('following_id', '=',$user->id)->where('accepted', '=', true)->exists();
     }
 
 }

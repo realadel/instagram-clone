@@ -37,4 +37,16 @@ class UserController extends Controller
         $user->update($data);
         return redirect()->route('edit.profile', $data['username'])->with('success', 'Profile updated.');
     }
+
+    public function follow(User $user)
+    {
+        auth()->user()->follow($user);
+        return back();
+    }
+
+    public function unfollow(User $user)
+    {
+        auth()->user()->unfollow($user);
+        return back();
+    }
 }

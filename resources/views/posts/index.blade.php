@@ -35,9 +35,22 @@
                                 </a>
                             </div>
                             <div class="flex flex-col grow">
-                                <a href="/{{ $suggested_user->username }}" class="font-bold">{{ $suggested_user->username }}</a>
+                                <a href="/{{ $suggested_user->username }}" class="font-bold">
+                                    {{ $suggested_user->username }}
+                                    @if(auth()->user()->isThisUserFollowingMe($suggested_user))
+                                        <span class="text-xs text-gray-500">{{ __('Follower') }}</span>
+                                    @endif
+                                </a>
                                 <p class="text-gray-500 text-sm">{{ $suggested_user->name }}</p>
                             </div>
+                            @if(auth()->user()->isFollowingRequestPending($suggested_user))
+                                <span class="text-gray-500 font-bold">{{ __('Pending') }}</span>
+                            @else
+                                <form action="{{ route('follow.user', $suggested_user->username) }}" method="POST">
+                                    @csrf
+                                    <button class="text-blue-500 font-bold">{{ __('Follow') }}</button>
+                                </form>
+                            @endif
                         </li>
                     @endforeach
                 </ul>

@@ -44,6 +44,10 @@ Route::post('/p/{post:slug}/comment', [CommentController::class, 'store'])->name
 // Like Posts Controller
 Route::get('/p/{post:slug}/like', likeController::class)->middleware('auth')->name('like.post');
 
+// Follow a User Controller
+Route::post('{user:username}/follow', [UserController::class, 'follow'])->middleware('auth')->name('follow.user');
+Route::post('{user:username}/unfollow', [UserController::class, 'unfollow'])->middleware('auth')->name('unfollow.user');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
